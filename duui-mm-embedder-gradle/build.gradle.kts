@@ -14,6 +14,8 @@ dependencies {
     testImplementation("org.dkpro.core:dkpro-core-io-xmi-asl:2.4.0")
     testImplementation("org.dkpro.core:dkpro-core-io-json-asl:2.0.0")
     testImplementation("org.dkpro.core:dkpro-core-api-resources-asl:2.4.0")
+    testImplementation("org.junit.platform:junit-platform-engine:1.9.0")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.9.0")
 }
 
 java {
@@ -22,12 +24,20 @@ java {
 }
 
 tasks.withType<Test> {
-    jvmArgs(
-        "--illegal-access=permit",
-        "--add-opens java.base/java.util=ALL-UNNAMED"
-    )
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
+}
+
+sourceSets {
+    test {
+        java {
+            srcDir("src/test/java")
+        }
+    }
 }

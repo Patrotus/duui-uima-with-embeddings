@@ -78,5 +78,47 @@
             </features>
         </typeDescription>
 
+        <typeDescription>
+            <name>org.texttechnologylab.annotation.embeddings.Embedding</name>
+            <description>Basic type for all kinds of embeddings</description>
+            <supertypeName>uima.tcas.Annotation</supertypeName>
+            <features>
+                <featureDescription>
+                    <name>embedding</name>
+                    <description>Represents embeddings as a vector</description>
+                    <rangeTypeName>uima.cas.FloatArray</rangeTypeName>
+                </featureDescription>
+                <featureDescription>
+                    <name>shape</name>
+                    <description>Shape of the returned tensor</description>
+                    <rangeTypeName>uima.cas.IntegerArray</rangeTypeName>
+                </featureDescription>
+            </features>
+        </typeDescription>
+
+        <typeDescription>
+            <name>org.texttechnologylab.annotation.embeddings.TextEmbedding</name>
+            <description>Text-Embedding</description>
+            <supertypeName>org.texttechnologylab.annotation.embeddings.Embedding</supertypeName>
+        </typeDescription>
+
+        <typeDescription>
+            <name>org.texttechnologylab.annotation.embeddings.ImageEmbedding</name>
+            <description>Bild-Embedding</description>
+            <supertypeName>org.texttechnologylab.annotation.embeddings.Embedding</supertypeName>
+        </typeDescription>
+
+        <typeDescription>
+            <name>org.texttechnologylab.annotation.embeddings.VideoEmbedding</name>
+            <description>Video-Embedding</description>
+            <supertypeName>org.texttechnologylab.annotation.embeddings.Embedding</supertypeName>
+        </typeDescription>
+
+        <typeDescription>
+            <name>org.texttechnologylab.annotation.embeddings.AudioEmbedding</name>
+            <description>Audio-Embedding</description>
+            <supertypeName>org.texttechnologylab.annotation.embeddings.Embedding</supertypeName>
+        </typeDescription>
+
     </types>
 </typeSystemDescription>

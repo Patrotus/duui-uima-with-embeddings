@@ -67,7 +67,6 @@ class ModelConfig(BaseModel):
 
 
 class BaseTypeRequest(BaseModel):
-    """Basis-Klasse für alle Typ-spezifischen Requests"""
     config: ModelConfig
 
 
@@ -77,7 +76,6 @@ class DUUIMMTextRequest(BaseTypeRequest):
 
 class DUUIMMAudioRequest(BaseTypeRequest):
     audios: List[AudioType]
-    config: ModelConfig
 
 
 class DUUIMMVideoRequest(BaseTypeRequest):
@@ -104,13 +102,16 @@ class DUUIMMEmbeddingsRequest(BaseModel):
     # Language of the document
     doc_lang: str
 
-    # Length of the document
-    doc_len: int
-
 
 class EmbeddingResponse(BaseModel):
     embedding: List[float]
     shape: List[int]
+
+
+class LLMResult(BaseModel):
+    meta: str  # json string
+    prompt_ref: int  # internal cas annotation id
+    message_ref: str  # internal cas annotation id
 
 
 class DUUIMMEmbeddingsResponse(BaseModel):
@@ -121,4 +122,4 @@ class DUUIMMEmbeddingsResponse(BaseModel):
     image_embeddings: Optional[List[EmbeddingResponse]] = None
     video_embeddings: Optional[List[EmbeddingResponse]] = None
     audio_embeddings: Optional[List[EmbeddingResponse]] = None
-    errors: Optional[List[str]]
+    errors: Optional[List[LLMResult]]

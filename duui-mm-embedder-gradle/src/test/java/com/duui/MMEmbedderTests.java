@@ -1,3 +1,5 @@
+package com.duui;
+
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.uima.UIMAException;
 import org.apache.uima.fit.factory.JCasFactory;
@@ -32,8 +34,6 @@ import java.util.*;
 
 import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
 
-//import static org.junit.Assert.assertEquals;
-
 public class MMEmbedderTests {
 
     static DUUIComposer composer;
@@ -41,6 +41,7 @@ public class MMEmbedderTests {
 
     //    static String url = "http://anduin.hucompute.org:9991";
 //    static String url = "http://127.0.0.1:8634";
+    // Accessing the duui-component from the given url
     static String url = "http://127.0.0.1:9714";
 
     static String model = "microsoft/Phi-4-multimodal-instruct";
@@ -252,7 +253,6 @@ public class MMEmbedderTests {
         composer.add(
                 new DUUIRemoteDriver.Component(url)
                         .withParameter("model_name", "Qwen/Qwen2.5-VL-7B-Instruct")
-                        .withParameter("mode", "text")
                         .build().withTimeout(1000)
 
         );
