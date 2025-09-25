@@ -18,7 +18,6 @@ function serialize(inputCas, outputStream, parameters)
 
     -- TODO: Im still a little bit confused whether the current implementation is even remotly correct
 
-    -- Handle Text Modalities
     local texts = nil
     local texts_array = {}
     local number_of_texts = 1
@@ -41,7 +40,6 @@ function serialize(inputCas, outputStream, parameters)
     }
 
 
-    -- Handle Image Modalities
     local images = nil
     local images_array = {}
     local number_of_images = 1
@@ -65,7 +63,6 @@ function serialize(inputCas, outputStream, parameters)
         }
     }
 
-    -- Handle Video Modalities
     local videos = nil
     local videos_array = {}
     local number_of_videos = 1
@@ -90,7 +87,6 @@ function serialize(inputCas, outputStream, parameters)
         }
     }
 
-    -- Handle Audio Modalities
     local audios = nil
     local audios_array = {}
     local number_of_audios = 1
@@ -112,7 +108,6 @@ function serialize(inputCas, outputStream, parameters)
         }
     }
 
-    -- Request gemäß settings.py DUUIMMEmbeddingsRequest erstellen
     local request = {
         images = images,
         audios = audios,
@@ -122,7 +117,6 @@ function serialize(inputCas, outputStream, parameters)
         doc_len = doc_len
     }
 
-    -- Request als JSON schreiben
     outputStream:write(json.encode(request))
 end
 
@@ -134,7 +128,6 @@ function deserialize(inputCas, inputStream)
     local response = json.decode(inputString)
     print(response)
 
-    -- Fehler verarbeiten, falls vorhanden
     if response['errors'] ~= nil then
         local errors = response['errors']
         for _, error in ipairs(errors) do
@@ -172,7 +165,6 @@ function deserialize(inputCas, inputStream)
         for i, embedding in ipairs(response['image_embeddings']) do
             local embed_anno = luajava.newInstance("org.texttechnologylab.annotation.embeddings.ImageEmbedding", inputCas)
 
-            -- Embedding-Array konvertieren
             local embed_fs = luajava.newInstance("org.apache.uima.jcas.cas.FloatArray", inputCas, #embedding.embedding)
             for j, value in ipairs(embedding.embedding) do
                 embed_fs:set(j - 1, value)
