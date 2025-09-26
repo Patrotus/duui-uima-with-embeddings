@@ -1,14 +1,43 @@
 import gc
+import time
+
 import torch
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import PlainTextResponse
 
-from constants import STATIC_ENCODING
-from embeddings.process import process_text, process_video, process_image, process_audio
-from logger import get_logger
-from model.DUUIEnvironment import DUUIEnvironment
-from settings import Settings, DUUIMMEmbeddingsRequest, DUUIMMEmbeddingsResponse, EmbeddingResponse
+from .constants import STATIC_ENCODING
+from .embeddings.process import process_text, process_video, process_image, process_audio
+from .logger import get_logger
+from .model.duui_environment import DUUIEnvironment
+from .settings import Settings, DUUIMMEmbeddingsRequest, DUUIMMEmbeddingsResponse, EmbeddingResponse
 
+
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        logger = get_logger()
+        request_id = str(time.time())
+        logger.info(f"Request {request_id} started: {request.method} {request.url.path}")
+
+        if request.method == "POST":
+            try:
+                body_bytes = await request.body()
+                max_body_log = 1000  # Max chars to log
+                body_str = body_bytes.decode('utf-8')
+                logger.info(f"Request {request_id} body (truncated): {body_str[:max_body_log]}{'...' if len(body_str) > max_body_log else ''}")
+
+                request._body = body_bytes
+            except Exception as e:
+                logger.error(f"Error reading request body: {str(e)}")
+
+        start_time = time.time()
+
+        response = await call_next(request)
+
+        process_time = time.time() - start_time
+        logger.info(f"Request {request_id} completed: {response.status_code} in {process_time:.3f}s")
+
+        return response
 
 def create_app(settings: Settings, environment: DUUIEnvironment):
     logger = get_logger()
@@ -30,6 +59,8 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
             "url": "http://www.gnu.org/licenses/agpl-3.0.en.html",
         }
     )
+
+    app.add_middleware(LoggingMiddleware)
 
     def tensor_to_embedding_response(tensor: torch.Tensor) -> EmbeddingResponse:
         numpy_array = tensor.cpu().numpy()
@@ -56,11 +87,23 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
     def post_process(request: DUUIMMEmbeddingsRequest) -> DUUIMMEmbeddingsResponse:
         errors = []
         try:
+            logger.info(request)
+            text_embeddings, video_embeddings, audio_embeddings, image_embeddings = [], [], [], []
             # Execute processing
-            text_embeddings = process_text(request.texts)
-            video_embeddings = process_video(request.videos)
-            audio_embeddings = process_audio(request.audios)
-            image_embeddings = process_image(request.images)
+            if len(request.texts.texts) > 0:
+                logger.info("Processing texts")
+                text_embeddings = process_text(request.texts)
+            if len(request.videos.videos) > 0:
+                logger.info("Processing videos")
+                text_embeddings = process_video(request.videos)
+
+            if len(request.audios.audios) > 0:
+                logger.info("Processing audios")
+                text_embeddings = process_audio(request.audios)
+
+            if len(request.images.images) > 0:
+                logger.info("Processing images")
+                text_embeddings = process_image(request.images)
 
             return DUUIMMEmbeddingsResponse(
                 text_embeddings=[tensor_to_embedding_response(tensor) for tensor in text_embeddings],

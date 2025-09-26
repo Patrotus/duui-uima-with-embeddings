@@ -2,6 +2,7 @@ StandardCharsets = luajava.bindClass("java.nio.charset.StandardCharsets")
 Class = luajava.bindClass("java.lang.Class")
 JCasUtil = luajava.bindClass("org.apache.uima.fit.util.JCasUtil")
 TopicUtils = luajava.bindClass("org.texttechnologylab.DockerUnifiedUIMAInterface.lua.DUUILuaUtils")
+ArrayList = luajava.bindClass("java.util.ArrayList")
 
 -- Types used in embeddings
 Image = luajava.bindClass("org.texttechnologylab.annotation.type.Image")
@@ -18,95 +19,107 @@ function serialize(inputCas, outputStream, parameters)
 
     -- TODO: Im still a little bit confused whether the current implementation is even remotly correct
 
+    print("Process text")
     local texts = nil
-    local texts_array = {}
-    local number_of_texts = 1
-    local texts_in = luajava.newInstance("java.util.ArrayList", JCasUtil:select(inputCas, Text)):listIterator()
-    while texts_in:hasNext() do
-        local text = texts_in:next()
-        texts_array[number_of_texts] {
-            text = text:getText(),
-            begin = text:getBegin(),
-            ['end'] = text:getBegin(),
+    local docText = inputCas:getDocumentText()
+    local docLen = #docText
+    -- FIXME: Temp test: Using whole text array as one input
+    if docText and docLen > 0 then
+        local texts_array = {}
+        texts_array[1] = {
+            text = docText,
+            begin = 0,
+            ['end'] = docLen
         }
-        number_of_texts = number_of_texts + 1
+
+        texts = {
+            texts = texts_array,
+            config = {
+                model_name = parameters["text_model_name"],
+            }
+        }
     end
-    texts = {
-        texts = texts_array,
-        config = {
-            model_name = parameters["text_model_name"], -- TODO: I dont think this is correct
-            model_params = {} -- TODO: Not supported yet
-        }
-    }
 
-
+    print("Process Images")
     local images = nil
-    local images_array = {}
-    local number_of_images = 1
-    local images_in = luajava.newInstance("java.util.ArrayList", JCasUtil:select(inputCas, Image)):listIterator()
-    while images_in:hasNext() do
-        local image = images_in:next()
-        images_array[number_of_images] {
-            src = image:getSrc(),
-            height = image:getHeight(),
-            width = image:getWidth(),
-            begin = image:getBegin(),
-            ['end'] = image:getEnd()
-        }
-        number_of_images = number_of_images + 1
-    end
-    images = {
-        images = images_array,
-        config = {
-            model_name = parameters["image_model_name"], -- TODO: I dont think this is correct
-            model_params = {} -- TODO: Not supported yet
-        }
-    }
+    local image_collection = JCasUtil:select(inputCas, Image)
+    local image_collection_size = image_collection:size()
+    if image_collection and image_collection_size > 0 then
+        local images_array = {}
+        local number_of_images = 1
 
+        for i = 0, image_collection_size - 1 do
+            local image = image_collection:get(i)
+            images_array[number_of_images] = {
+                src = image:getSrc(),
+                height = image:getHeight(),
+                width = image:getWidth(),
+                begin = image:getBegin(),
+                ['end'] = image:getEnd()
+            }
+            number_of_images = number_of_images + 1
+        end
+
+        images = {
+            images = images_array,
+            config = {
+                model_name = parameters["image_model_name"], -- TODO: I dont think this is correct
+            }
+        }
+    end
+
+    print("Process videos")
     local videos = nil
-    local videos_array = {}
-    local number_of_videos = 1
-    local class = Class:forName("org.texttechnologylab.annotation.type.Video")
-    local videos_in = JCasUtil:select(inputCas, class):iterator()
-    while videos_in:hasNext() do
-        local video = videos_in:next()
-        videos_array[number_of_videos] {
-            src = video:getSrc(),
-            length = video:getLength(),
-            fps = video:getFps(),
-            begin = video:getBegin(),
-            ['end'] = video:getEnd()
-        }
-        number_of_videos = number_of_videos + 1
-    end
-    videos = {
-        videos = videos_array,
-        config = {
-            model_name = parameters["video_model_name"], -- TODO: I dont think this is correct
-            model_params = {} -- TODO: Not supported yet
-        }
-    }
+    local video_collection = JCasUtil:select(inputCas, Video)
+    local video_collection_size = video_collection:size()
+    if video_collection and video_collection_size > 0 then
+        local videos_array = {}
+        local number_of_videos = 1
 
-    local audios = nil
-    local audios_array = {}
-    local number_of_audios = 1
-    local audio_in = JCasUtil:select(inputCas, Audio):iterator()
-    while audio_in:hasNext() do
-        local audio = audio_in:next()
-        audios_array[number_of_audios] {
-            src = audio:getSrc(),
-            begin = audio:getBegin(),
-            ['end'] = audio:getEnd()
+        for i = 0, video_collection_size - 1 do
+            local video = video_collection:get(i)
+            videos_array[number_of_videos] = {
+                src = video:getSrc(),
+                length = video:getLength(),
+                fps = video:getFps(),
+                begin = video:getBegin(),
+                ['end'] = video:getEnd()
+            }
+            number_of_videos = number_of_videos + 1
+        end
+
+        videos = {
+            videos = videos_array,
+            config = {
+                model_name = parameters["video_model_name"], -- TODO: I dont think this is correct
+            }
         }
-        number_of_audios = number_of_audios + 1
     end
-    audios = {
-        audios = audios_array,
-        config = {
-            model_name = parameters["audio_model_name"], -- TODO: I dont think this is correct
-            model_params = {} -- TODO: Not supported yet
+
+    print("Process audios")
+    local audios = nil
+    local audio_collection = JCasUtil:select(inputCas, Audio)
+    local audio_collection_size = audio_collection:size()
+    if audio_collection and audio_collection_size > 0 then
+        local audios_array = {}
+        local number_of_audios = 1
+
+        for i = 0, audio_collection_size - 1 do
+            local audio = audio_collection:get(i)
+            audios_array[i] = {
+                src = audio:getSrc(),
+                begin = audio:getBegin(),
+                ['end'] = audio:getEnd()
+            }
+            number_of_audios = number_of_audios + 1
+        end
+        audios = {
+            audios = audios_array,
+            config = {
+                model_name = parameters["audio_model_name"], -- TODO: I dont think this is correct
+            }
         }
-    }
+    end
 
     local request = {
         images = images,
@@ -116,6 +129,8 @@ function serialize(inputCas, outputStream, parameters)
         doc_lang = doc_lang,
         doc_len = doc_len
     }
+
+    print(json.encode(request))
 
     outputStream:write(json.encode(request))
 end

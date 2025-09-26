@@ -7,7 +7,7 @@ from app.logger import get_logger, initialize_logger
 from app.utils.lua_communication import load_lua_communicator
 from app.utils.typessystem_loader import load_typesystem_from_file
 from app.api import create_app
-from app.model import DUUIEnvironment
+from app.model.duui_environment import DUUIEnvironment
 
 # TODO: Use settings from start.sh or Dockerfile, instead of hardcoding
 settings = Settings(
@@ -15,7 +15,7 @@ settings = Settings(
     annotator_version='0.0.1',
     # TODO: Could be int? Taken from duui-mm
     mm_model_cache_size='1',
-    log_level='INFO'
+    log_level='DEBUG'
 )
 # FIXME: Unused, taken from duui-mm, not implemented yet
 lru_cache_with_size = lru_cache(maxsize=int(settings.mm_model_cache_size))
