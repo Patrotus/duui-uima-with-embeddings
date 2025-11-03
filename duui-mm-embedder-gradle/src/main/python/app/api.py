@@ -1,5 +1,6 @@
 import gc
 import time
+import json
 
 import torch
 from fastapi import FastAPI, Response, Request
@@ -10,7 +11,7 @@ from .constants import STATIC_ENCODING
 from .embeddings.process import process_text, process_video, process_image, process_audio
 from .logger import get_logger
 from .model.duui_environment import DUUIEnvironment
-from .settings import Settings, DUUIMMEmbeddingsRequest, DUUIMMEmbeddingsResponse, EmbeddingResponse
+from .settings import Settings, DUUIMMEmbeddingsRequest, DUUIMMEmbeddingsResponse, EmbeddingResponse, LLMResult
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -62,6 +63,9 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
 
     app.add_middleware(LoggingMiddleware)
 
+    def _generate_dummy_ref() -> str:
+        return str(time.time())
+
     def tensor_to_embedding_response(tensor: torch.Tensor) -> EmbeddingResponse:
         numpy_array = tensor.cpu().numpy()
         return EmbeddingResponse(
@@ -86,36 +90,84 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
     @app.post("/v1/process")
     def post_process(request: DUUIMMEmbeddingsRequest) -> DUUIMMEmbeddingsResponse:
         errors = []
+        logger.info("Started request")
         try:
             logger.info(request)
             text_embeddings, video_embeddings, audio_embeddings, image_embeddings = [], [], [], []
             # Execute processing
-            if len(request.texts.texts) > 0:
+            if request.texts is not None and len(request.texts.texts) > 0:
                 logger.info("Processing texts")
-                text_embeddings = process_text(request.texts)
-            if len(request.videos.videos) > 0:
+                try:
+                    text_embeddings = process_text(request.texts)
+                except Exception as text_ex:
+                    logger.error(f"Error processing texts: {text_ex}", exc_info=True)
+                    dummy_ref = _generate_dummy_ref()
+                    error_result = LLMResult(
+                        meta=json.dumps({"error": "Text processing failed", "detail": str(text_ex)}),
+                        prompt_ref=dummy_ref,
+                        message_ref=dummy_ref
+                    )
+                    errors.append(error_result)
+
+            if request.videos is not None and len(request.videos.videos) > 0:
                 logger.info("Processing videos")
-                text_embeddings = process_video(request.videos)
+                try:
+                    video_embeddings = process_video(request.videos)
+                except Exception as video_ex:
+                    logger.error(f"Error processing videos: {video_ex}", exc_info=True)
+                    dummy_ref = _generate_dummy_ref()
+                    error_result = LLMResult(
+                        meta=json.dumps({"error": "Video processing failed", "detail": str(video_ex)}),
+                        prompt_ref=dummy_ref,
+                        message_ref=dummy_ref
+                    )
+                    errors.append(error_result)
 
-            if len(request.audios.audios) > 0:
+            if request.audios is not None and len(request.audios.audios) > 0:
                 logger.info("Processing audios")
-                text_embeddings = process_audio(request.audios)
+                try:
+                    audio_embeddings = process_audio(request.audios)
+                except Exception as audio_ex:
+                    logger.error(f"Error processing audios: {audio_ex}", exc_info=True)
+                    dummy_ref = _generate_dummy_ref()
+                    error_result = LLMResult(
+                        meta=json.dumps({"error": "Audio processing failed", "detail": str(audio_ex)}),
+                        prompt_ref=dummy_ref,
+                        message_ref=dummy_ref
+                    )
+                    errors.append(error_result)
 
-            if len(request.images.images) > 0:
+            if request.images is not None and len(request.images.images) > 0:
                 logger.info("Processing images")
-                text_embeddings = process_image(request.images)
+                try:
+                    image_embeddings = process_image(request.images)
+                except Exception as image_ex:
+                    logger.error(f"Error processing images: {image_ex}", exc_info=True)
+                    dummy_ref = _generate_dummy_ref()
+                    error_result = LLMResult(
+                        meta=json.dumps({"error": "Image processing failed", "detail": str(image_ex)}),
+                        prompt_ref=dummy_ref,
+                        message_ref=dummy_ref
+                    )
+                    errors.append(error_result)
 
-            return DUUIMMEmbeddingsResponse(
+            logger.info("Reached response")
+
+            response =  DUUIMMEmbeddingsResponse(
                 text_embeddings=[tensor_to_embedding_response(tensor) for tensor in text_embeddings],
                 video_embeddings=[tensor_to_embedding_response(tensor) for tensor in video_embeddings],
                 audio_embeddings=[tensor_to_embedding_response(tensor) for tensor in audio_embeddings],
                 image_embeddings=[tensor_to_embedding_response(tensor) for tensor in image_embeddings],
-                # FIXME: Error handling
-                errors=[],
+                errors=errors if errors else None,
             )
+            # print(response)
+            return response
 
         except Exception as ex:
             logger.exception(ex)
+            # print(ex)
+            print(ex)
+            return DUUIMMEmbeddingsResponse(errors=[{}])
             return DUUIMMEmbeddingsResponse(errors=[str(ex)])
         finally:
             # Taken from duui-mm

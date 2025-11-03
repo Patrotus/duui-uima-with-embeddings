@@ -3,6 +3,7 @@ Class = luajava.bindClass("java.lang.Class")
 JCasUtil = luajava.bindClass("org.apache.uima.fit.util.JCasUtil")
 TopicUtils = luajava.bindClass("org.texttechnologylab.DockerUnifiedUIMAInterface.lua.DUUILuaUtils")
 ArrayList = luajava.bindClass("java.util.ArrayList")
+EmbeddingClass = luajava.bindClass("org.texttechnologylab.uima.type.Embedding")
 
 -- Types used in embeddings
 Image = luajava.bindClass("org.texttechnologylab.annotation.type.Image")
@@ -96,34 +97,8 @@ function serialize(inputCas, outputStream, parameters)
         }
     end
 
-    print("Process audios")
-    local audios = nil
-    local audio_collection = JCasUtil:select(inputCas, Audio)
-    local audio_collection_size = audio_collection:size()
-    if audio_collection and audio_collection_size > 0 then
-        local audios_array = {}
-        local number_of_audios = 1
-
-        for i = 0, audio_collection_size - 1 do
-            local audio = audio_collection:get(i)
-            audios_array[i] = {
-                src = audio:getSrc(),
-                begin = audio:getBegin(),
-                ['end'] = audio:getEnd()
-            }
-            number_of_audios = number_of_audios + 1
-        end
-        audios = {
-            audios = audios_array,
-            config = {
-                model_name = parameters["audio_model_name"], -- TODO: I dont think this is correct
-            }
-        }
-    end
-
     local request = {
         images = images,
-        audios = audios,
         videos = videos,
         texts = texts,
         doc_lang = doc_lang,
@@ -157,20 +132,20 @@ function deserialize(inputCas, inputStream)
 
     if response['text_embeddings'] ~= nil then
         for i, embedding in ipairs(response['text_embeddings']) do
-            local embed_anno = luajava.newInstance("org.texttechnologylab.annotation.embeddings.TextEmbedding", inputCas)
+            local embed_anno = luajava.newInstance("org.texttechnologylab.uima.type.Embedding", inputCas)
 
             local embed_fs = luajava.newInstance("org.apache.uima.jcas.cas.FloatArray", inputCas, #embedding.embedding)
             for j, value in ipairs(embedding.embedding) do
                 embed_fs:set(j - 1, value)
             end
 
-            embed_anno:setEmbedding(embed_fs)
+            --local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
+            --for j, value in ipairs(embedding.shape) do
+            --    shape_fs:set(j - 1, value)
+            --end
+            --embed_anno:setShape(shape_fs)
 
-            local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
-            for j, value in ipairs(embedding.shape) do
-                shape_fs:set(j - 1, value)
-            end
-            embed_anno:setShape(shape_fs)
+            embed_anno:setEmbedding(embed_fs)
 
             embed_anno:addToIndexes()
         end
@@ -178,7 +153,7 @@ function deserialize(inputCas, inputStream)
 
     if response['image_embeddings'] ~= nil then
         for i, embedding in ipairs(response['image_embeddings']) do
-            local embed_anno = luajava.newInstance("org.texttechnologylab.annotation.embeddings.ImageEmbedding", inputCas)
+            local embed_anno = luajava.newInstance("org.texttechnologylab.uima.type.Embedding", inputCas)
 
             local embed_fs = luajava.newInstance("org.apache.uima.jcas.cas.FloatArray", inputCas, #embedding.embedding)
             for j, value in ipairs(embedding.embedding) do
@@ -187,11 +162,11 @@ function deserialize(inputCas, inputStream)
 
             embed_anno:setEmbedding(embed_fs)
 
-            local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
-            for j, value in ipairs(embedding.shape) do
-                shape_fs:set(j - 1, value)
-            end
-            embed_anno:setShape(shape_fs)
+            --local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
+            --for j, value in ipairs(embedding.shape) do
+            --    shape_fs:set(j - 1, value)
+            --end
+            --embed_anno:setShape(shape_fs)
 
             embed_anno:addToIndexes()
         end
@@ -208,11 +183,11 @@ function deserialize(inputCas, inputStream)
 
             embed_anno:setEmbedding(embed_fs)
 
-            local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
-            for j, value in ipairs(embedding.shape) do
-                shape_fs:set(j - 1, value)
-            end
-            embed_anno:setShape(shape_fs)
+            --local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
+            --for j, value in ipairs(embedding.shape) do
+            --    shape_fs:set(j - 1, value)
+            --end
+            --embed_anno:setShape(shape_fs)
 
             embed_anno:addToIndexes()
         end
@@ -229,11 +204,11 @@ function deserialize(inputCas, inputStream)
 
             embed_anno:setEmbedding(embed_fs)
 
-            local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
-            for j, value in ipairs(embedding.shape) do
-                shape_fs:set(j - 1, value)
-            end
-            embed_anno:setShape(shape_fs)
+            --local shape_fs = luajava.newInstance("org.apache.uima.jcas.cas.IntegerArray", inputCas, #embedding.shape)
+            --for j, value in ipairs(embedding.shape) do
+            --    shape_fs:set(j - 1, value)
+            --end
+            --embed_anno:setShape(shape_fs)
 
             embed_anno:addToIndexes()
         end

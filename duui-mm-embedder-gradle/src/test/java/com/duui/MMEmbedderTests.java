@@ -201,11 +201,11 @@ public class MMEmbedderTests {
     }
 
     @Test
-    public void testSomething() throws Exception {
+    public void testTextOnly() throws Exception {
         composer.add(
                 new DUUIRemoteDriver.Component(url)
                         .build().withTimeout(1000)
-                        .withParameter("text_model_name", "Qwen/Qwen2.5-VL-7B-Instruct")
+                        .withParameter("text_model_name", "Qwen/Qwen2.5-VL-3B-Instruct")
         );
         composer.add(new DUUIUIMADriver.Component(createEngineDescription(XmiWriter.class,
                 XmiWriter.PARAM_TARGET_LOCATION, sOutputPath,
@@ -218,8 +218,69 @@ public class MMEmbedderTests {
         stringListe.add("Hello World. I'm happy to meet you");
         createCas("en", stringListe, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-        System.out.println(cas.getDocumentText());
-        System.out.println("So far, so good");
+        composer.run(cas);
+
+        for (Result result : JCasUtil.select(cas, Result.class)) {
+            System.out.println(result);
+        }
+    }
+
+    @Test
+    public void testTextAndImage() throws Exception {
+        composer.add(
+                new DUUIRemoteDriver.Component(url)
+                        .build().withTimeout(1000)
+                        .withParameter("text_model_name", "Qwen/Qwen2.5-VL-3B-Instruct")
+                        .withParameter("image_model_name", "Qwen/Qwen2.5-VL-3B-Instruct")
+        );
+        composer.add(new DUUIUIMADriver.Component(createEngineDescription(XmiWriter.class,
+                XmiWriter.PARAM_TARGET_LOCATION, sOutputPath,
+                XmiWriter.PARAM_PRETTY_PRINT, true,
+                XmiWriter.PARAM_OVERWRITE, true,
+                XmiWriter.PARAM_VERSION, "1.1"
+        )).build());
+
+        ArrayList<String> stringListe = new ArrayList<>();
+        stringListe.add("Hello World. I'm happy to meet you");
+
+        List<String> imagePaths = Arrays.asList(
+                "src/test/resources/images/cars.jpg",
+                "src/test/resources/images/fridge.jpg"
+        );
+
+        createCas("en", stringListe, imagePaths, new ArrayList<>(), new ArrayList<>());
+
+        composer.run(cas);
+
+        for (Result result : JCasUtil.select(cas, Result.class)) {
+            System.out.println(result);
+        }
+    }
+
+    @Test
+    public void testTextAndVideo() throws Exception {
+        composer.add(
+                new DUUIRemoteDriver.Component(url)
+                        .build().withTimeout(1000)
+                        .withParameter("text_model_name", "Qwen/Qwen2.5-VL-3B-Instruct")
+                        .withParameter("video_model_name", "Qwen/Qwen2.5-VL-3B-Instruct")
+        );
+        composer.add(new DUUIUIMADriver.Component(createEngineDescription(XmiWriter.class,
+                XmiWriter.PARAM_TARGET_LOCATION, sOutputPath,
+                XmiWriter.PARAM_PRETTY_PRINT, true,
+                XmiWriter.PARAM_OVERWRITE, true,
+                XmiWriter.PARAM_VERSION, "1.1"
+        )).build());
+
+        ArrayList<String> stringListe = new ArrayList<>();
+        stringListe.add("Hello World. I'm happy to meet you");
+
+        List<String> videoPaths = Arrays.asList(
+                convertFileToBase64("src/test/resources/videos/kids_video.mp4")
+        );
+
+        createCas("en", stringListe, new ArrayList<>(), videoPaths, new ArrayList<>());
+
         composer.run(cas);
 
         for (Result result : JCasUtil.select(cas, Result.class)) {

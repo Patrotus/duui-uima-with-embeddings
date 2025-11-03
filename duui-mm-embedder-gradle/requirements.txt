@@ -2,8 +2,6 @@ accelerate==1.10.1
 annotated-types==0.7.0
 anyio==4.10.0
 attrs==25.3.0
-audioop-lts==0.2.2
-audioread==3.0.1
 av==15.1.0
 certifi==2025.8.3
 cffi==2.0.0

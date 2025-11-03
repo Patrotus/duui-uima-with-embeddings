@@ -92,7 +92,6 @@ class DUUIMMEmbeddingsRequest(BaseModel):
     """
 
     images: Optional[DUUIMMImageRequest] = None
-
     audios: Optional[DUUIMMAudioRequest] = None
 
     videos: Optional[DUUIMMVideoRequest] = None
@@ -122,4 +121,4 @@ class DUUIMMEmbeddingsResponse(BaseModel):
     image_embeddings: Optional[List[EmbeddingResponse]] = None
     video_embeddings: Optional[List[EmbeddingResponse]] = None
     audio_embeddings: Optional[List[EmbeddingResponse]] = None
-    errors: Optional[List[LLMResult]]
+    errors: Optional[List[LLMResult]] = None
