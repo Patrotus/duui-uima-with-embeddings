@@ -1,6 +1,13 @@
-## TODO ##
-Bitte dieses README noch anpassen
+## TODO/WIP ##
+To be able to execute the tests, executed `./gradlew build` from this directory `duui-mm-embedder-gradle` 
 
+Afterward, tests from src/test can be executed.
+
+To run the duui-component, navigate to the app-root folder using `cd`:
+`cd src/main/python`.
+In this directory run uvicorn duui_mm_embeddings:app.
+
+Install all the requirements beforhand from the `requirements.txt`
 
 [//]: # ([![Version]&#40;https://img.shields.io/static/v1?label=duui-multimodal\&message=0.1.0\&color=blue&#41;]&#40;https://docker.texttechnologylab.org/v2/duui-multimodal/tags/list&#41;)
 
