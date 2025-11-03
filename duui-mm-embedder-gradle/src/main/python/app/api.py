@@ -1,6 +1,7 @@
 import gc
 import time
 import json
+from uuid import uuid4
 
 import torch
 from fastapi import FastAPI, Response, Request
@@ -63,8 +64,9 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
 
     app.add_middleware(LoggingMiddleware)
 
+    # Taken from duui-mm
     def _generate_dummy_ref() -> str:
-        return str(time.time())
+        return str(uuid4().int % 1_000_000)
 
     def tensor_to_embedding_response(tensor: torch.Tensor) -> EmbeddingResponse:
         numpy_array = tensor.cpu().numpy()
@@ -92,7 +94,6 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
         errors = []
         logger.info("Started request")
         try:
-            logger.info(request)
             text_embeddings, video_embeddings, audio_embeddings, image_embeddings = [], [], [], []
             # Execute processing
             if request.texts is not None and len(request.texts.texts) > 0:
@@ -109,6 +110,7 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
                     )
                     errors.append(error_result)
 
+            # TODO: Video processing
             if request.videos is not None and len(request.videos.videos) > 0:
                 logger.info("Processing videos")
                 try:
@@ -123,19 +125,19 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
                     )
                     errors.append(error_result)
 
-            if request.audios is not None and len(request.audios.audios) > 0:
-                logger.info("Processing audios")
-                try:
-                    audio_embeddings = process_audio(request.audios)
-                except Exception as audio_ex:
-                    logger.error(f"Error processing audios: {audio_ex}", exc_info=True)
-                    dummy_ref = _generate_dummy_ref()
-                    error_result = LLMResult(
-                        meta=json.dumps({"error": "Audio processing failed", "detail": str(audio_ex)}),
-                        prompt_ref=dummy_ref,
-                        message_ref=dummy_ref
-                    )
-                    errors.append(error_result)
+            # if request.audios is not None and len(request.audios.audios) > 0:
+            #     logger.info("Processing audios")
+            #     try:
+            #         audio_embeddings = process_audio(request.audios)
+            #     except Exception as audio_ex:
+            #         logger.error(f"Error processing audios: {audio_ex}", exc_info=True)
+            #         dummy_ref = _generate_dummy_ref()
+            #         error_result = LLMResult(
+            #             meta=json.dumps({"error": "Audio processing failed", "detail": str(audio_ex)}),
+            #             prompt_ref=dummy_ref,
+            #             message_ref=dummy_ref
+            #         )
+            #         errors.append(error_result)
 
             if request.images is not None and len(request.images.images) > 0:
                 logger.info("Processing images")
@@ -152,6 +154,7 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
                     errors.append(error_result)
 
             logger.info("Reached response")
+            logger.info(video_embeddings)
 
             response =  DUUIMMEmbeddingsResponse(
                 text_embeddings=[tensor_to_embedding_response(tensor) for tensor in text_embeddings],
@@ -160,15 +163,20 @@ def create_app(settings: Settings, environment: DUUIEnvironment):
                 image_embeddings=[tensor_to_embedding_response(tensor) for tensor in image_embeddings],
                 errors=errors if errors else None,
             )
-            # print(response)
+            # logger.info(response.errors)
+            # logger.info(response.video_embeddings)
             return response
 
         except Exception as ex:
             logger.exception(ex)
-            # print(ex)
-            print(ex)
-            return DUUIMMEmbeddingsResponse(errors=[{}])
-            return DUUIMMEmbeddingsResponse(errors=[str(ex)])
+            dummy_ref = _generate_dummy_ref()
+            error_result = LLMResult(
+                meta=json.dumps({"error": "General processing failed", "detail": str(ex)}),
+                prompt_ref=dummy_ref,
+                message_ref=dummy_ref
+            )
+            # logger.info(error_result)
+            return DUUIMMEmbeddingsResponse(errors=[error_result])
         finally:
             # Taken from duui-mm
             if torch.cuda.is_available():

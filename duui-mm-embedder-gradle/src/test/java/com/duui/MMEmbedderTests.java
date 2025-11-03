@@ -276,7 +276,7 @@ public class MMEmbedderTests {
         stringListe.add("Hello World. I'm happy to meet you");
 
         List<String> videoPaths = Arrays.asList(
-                convertFileToBase64("src/test/resources/videos/kids_video.mp4")
+                convertFileToBase64("src/test/resources/videos/kids2.mp4")
         );
 
         createCas("en", stringListe, new ArrayList<>(), videoPaths, new ArrayList<>());

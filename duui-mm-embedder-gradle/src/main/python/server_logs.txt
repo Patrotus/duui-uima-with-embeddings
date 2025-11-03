@@ -1,0 +1,75 @@
+INFO:app.logger:TTLab DUUI Multi Modal Embeddings
+INFO:app.logger:Name: DUUI Multi Modal Embeddings
+INFO:app.logger:Version: 0.0.1
+INFO:app.logger:Using Device: cpu
+INFO:     Started server process [11768]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:app.logger:Request 1762175734.624611 started: GET /v1/communication_layer
+INFO:app.logger:Request 1762175734.624611 completed: 200 in 0.001s
+INFO:     127.0.0.1:61578 - "GET /v1/communication_layer HTTP/1.1" 200 OK
+INFO:app.logger:Request 1762175734.667376 started: GET /v1/typesystem
+INFO:app.logger:Request 1762175734.667376 completed: 200 in 0.001s
+INFO:     127.0.0.1:61579 - "GET /v1/typesystem HTTP/1.1" 200 OK
+INFO:app.logger:Request 1762175734.9017959 started: POST /v1/process
+INFO:app.logger:Request 1762175734.9017959 body (truncated): {"videos":{"videos":[{"begin":0,"src":"AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAPIbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAAeAAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAvN0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAAeAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAB4AAAAQ4AAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAHgAAAEAAABAAAAAAJrbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAyAAAAGABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAACFm1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAdZzdGJsAAAAxnN0c2QAAAAAAAAAAQAAALZhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAB4AEOABIAAAASAAAAAAAAAABFUxhdmM2Mi4xMS4xMDAgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAAOWF2Y0MBZAAo/+EAHWdkACis2UB4AiflmoCAgKAAAAMAIAAABkHjBjLAAQAFaO+G8sD9+PgAAAAAE2NvbHJuY2x4AAEAAQABAAAAABRidHJ0AAAAAABo1OoAAAAAAAAAGHN0dHMAAAAAAAAAAQAAAAwAAAIAAAAAFHN0c3MAAAAAAAAAAQAAAAEAAABoY3R0cwAAAAAAAAALAAAAAQAABAAAAAABAAAKAAAAAAEAA...
+INFO:app.logger:Started request
+INFO:app.logger:Processing texts
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards:  50%|#####     | 1/2 [00:03<00:03,  3.79s/it]Loading checkpoint shards: 100%|##########| 2/2 [00:06<00:00,  2.92s/it]Loading checkpoint shards: 100%|##########| 2/2 [00:06<00:00,  3.05s/it]
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 1851.79it/s]
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 12557.80it/s]
+The image processor of type `Qwen2VLImageProcessor` is now loaded as a fast processor by default, even if the model checkpoint was saved with a slow processor. This is a breaking change and may produce slightly different outputs. To continue using the slow processor, instantiate this class with `use_fast=False`. Note that this behavior will be extended to all models in a future release.
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 9868.95it/s]
+INFO:app.logger:Processing videos
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 30174.85it/s]
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 26051.58it/s]
+Fetching 1 files:   0%|          | 0/1 [00:00<?, ?it/s]Fetching 1 files: 100%|##########| 1/1 [00:00<00:00, 17403.75it/s]
+qwen-vl-utils using torchvision to read video.
+C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\torchvision\io\_video_deprecation_warning.py:5: UserWarning: The video decoding and encoding capabilities of torchvision are deprecated from version 0.22 and will be removed in version 0.24. We recommend that you migrate to TorchCodec, where we'll consolidate the future decoding/encoding capabilities of PyTorch: https://github.com/pytorch/torchcodec
+  warnings.warn(
+WARNING:qwen_vl_utils.vision_process:video_reader_backend torchvision error, use torchvision as default, msg: 'video_fps'
+ERROR:app.logger:Error processing videos: 'video_fps'
+Traceback (most recent call last):
+  File "C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\qwen_vl_utils\vision_process.py", line 397, in fetch_video
+    video, sample_fps = VIDEO_READER_BACKENDS[video_reader_backend](ele)
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\qwen_vl_utils\vision_process.py", line 217, in _read_video_torchvision
+    total_frames, video_fps = video.size(0), info["video_fps"]
+                                             ~~~~^^^^^^^^^^^^^
+KeyError: 'video_fps'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\pauls\IdeaProjects\bachelor\duui-uima-with-embeddings\duui-mm-embedder-gradle\src\main\python\app\api.py", line 116, in post_process
+    video_embeddings = process_video(request.videos)
+  File "C:\Users\pauls\IdeaProjects\bachelor\duui-uima-with-embeddings\duui-mm-embedder-gradle\src\main\python\app\embeddings\process.py", line 71, in process_video
+    return process_request(
+        request,
+    ...<3 lines>...
+        lambda x: x.src
+    )
+  File "C:\Users\pauls\IdeaProjects\bachelor\duui-uima-with-embeddings\duui-mm-embedder-gradle\src\main\python\app\embeddings\process.py", line 41, in process_request
+    generator(processor(item))
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\pauls\IdeaProjects\bachelor\duui-uima-with-embeddings\duui-mm-embedder-gradle\src\main\python\app\embeddings\qwen_vl_base.py", line 114, in generate_video_embedding
+    image_inputs, video_inputs, video_kwargs = process_vision_info(messages, return_video_kwargs=True)
+                                               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\qwen_vl_utils\vision_process.py", line 482, in process_vision_info
+    video_input, video_sample_fps = fetch_video(vision_info, return_video_sample_fps=True)
+                                    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\qwen_vl_utils\vision_process.py", line 400, in fetch_video
+    video, sample_fps = VIDEO_READER_BACKENDS["torchvision"](ele)
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\pauls\IdeaProjects\bachelor\embeddings\DUUI-Embeddings\.venv\Lib\site-packages\qwen_vl_utils\vision_process.py", line 217, in _read_video_torchvision
+    total_frames, video_fps = video.size(0), info["video_fps"]
+                                             ~~~~^^^^^^^^^^^^^
+KeyError: 'video_fps'
+INFO:app.logger:Reached response
+INFO:app.logger:[]
+INFO:app.logger:Request 1762175734.9017959 completed: 200 in 14.725s
+Start here
+Video saved to: C:\Users\pauls\AppData\Local\Temp\tmplmamxbc0.mp4
+Cleaned up temporary file: C:\Users\pauls\AppData\Local\Temp\tmplmamxbc0.mp4
+INFO:     127.0.0.1:61579 - "POST /v1/process HTTP/1.1" 200 OK

@@ -116,7 +116,6 @@ function deserialize(inputCas, inputStream)
 
     local inputString = luajava.newInstance("java.lang.String", inputStream:readAllBytes(), StandardCharsets.UTF_8)
     local response = json.decode(inputString)
-    print(response)
 
     if response['errors'] ~= nil then
         local errors = response['errors']
